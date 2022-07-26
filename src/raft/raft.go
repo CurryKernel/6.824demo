@@ -56,7 +56,7 @@ type VoteState int
 type AppendEntriesState int
 
 //HeartBeatTimeout 定义一个全局心跳超时时间
-var HeartBeatTimeout = 120 * time.Millisecond
+var HeartBeatTimeout = 300 * time.Millisecond
 
 //枚举节点的类型：跟随者 竞选者 领导者
 const (

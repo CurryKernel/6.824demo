@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2a debug">
       <change beforePath="$PROJECT_DIR$/src/raft/raft.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/raft/raft.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -113,7 +112,8 @@
     <MESSAGE value="lab1 env" />
     <MESSAGE value="lab1" />
     <MESSAGE value="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447" />
-    <option name="LAST_COMMIT_MESSAGE" value="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447" />
+    <MESSAGE value="lab2a debug" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab2a debug" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
