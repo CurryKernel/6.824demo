@@ -18,13 +18,15 @@ package raft
 //
 
 import (
+	"labrpc"
 	//"crypto/rand"
 	"math/rand"
 	"sync"
 	"time"
 )
 import "sync/atomic"
-import "../labrpc"
+
+//import "labrpc"
 
 // import "bytes"
 // import "../labgob"
@@ -44,6 +46,14 @@ type ApplyMsg struct {
 	CommandValid bool
 	Command      interface{}
 	CommandIndex int
+}
+
+//
+// A Go object implementing a single Raft peer.
+//
+type LogEntry struct {
+	Command interface{}
+	Term    int
 }
 
 //Status 节点的角色
