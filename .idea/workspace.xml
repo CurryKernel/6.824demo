@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab1">
-      <change afterPath="$PROJECT_DIR$/src/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/linearizability/bitset.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/linearizability/linearizability.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/linearizability/model.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/linearizability/models.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/mrmaster" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/mrsequential" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/mrworker" afterDir="false" />
+    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/raft/raft.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/raft/raft.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +112,8 @@
     <MESSAGE value="lab1 pass all but crash test" />
     <MESSAGE value="lab1 env" />
     <MESSAGE value="lab1" />
-    <option name="LAST_COMMIT_MESSAGE" value="lab1" />
+    <MESSAGE value="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab2a &#10;参考&#10;https://blog.csdn.net/weixin_45938441/article/details/124552447" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
