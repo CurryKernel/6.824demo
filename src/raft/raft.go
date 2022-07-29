@@ -18,6 +18,9 @@ package raft
 //
 
 import (
+	"bytes"
+	"fmt"
+	"labgob"
 	"labrpc"
 	//"crypto/rand"
 	"math/rand"
@@ -179,6 +182,15 @@ func (rf *Raft) persist() {
 	// e.Encode(rf.yyy)
 	// data := w.Bytes()
 	// rf.persister.SaveRaftState(data)
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.logs)
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
+	//fmt.Printf("RaftNode[%d] persist starts, currentTerm[%d] voteFor[%d] log[%v]\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs)
+	//fmt.Printf("%v\n", string(data))
 }
 
 //
@@ -201,6 +213,21 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.xxx = xxx
 	//   rf.yyy = yyy
 	// }
+	r := bytes.NewBuffer(data)
+	d := labgob.NewDecoder(r)
+	var currentTerm int
+	var votedFor int
+	var logs []LogEntry
+	if d.Decode(&currentTerm) != nil ||
+		d.Decode(&votedFor) != nil ||
+		d.Decode(&logs) != nil {
+		fmt.Println("decode error")
+	} else {
+		rf.currentTerm = currentTerm
+		rf.votedFor = votedFor
+		rf.logs = logs
+		//fmt.Printf("RaftNode[%d] persist read, currentTerm[%d] voteFor[%d] log[%v]\n", rf.me, currentTerm, votedFor, logs)
+	}
 }
 
 // RequestVoteArgs
@@ -228,12 +255,6 @@ type RequestVoteReply struct {
 	VoteState   VoteState // 投票状态
 }
 
-//
-// example RequestVote RPC handler.
-// 个人认为定时刷新的地方应该是别的节点与当前节点在数据上不冲突时就要刷新
-// 因为如果不是数据冲突那么定时相当于防止自身去选举的一个心跳
-// 如果是因为数据冲突，那么这个节点不用刷新定时是为了当前整个raft能尽快有个正确的leader
-//
 // RequestVote
 // example RequestVote RPC handler.
 // 个人认为定时刷新的地方应该是别的节点与当前节点在数据上不冲突时就要刷新
@@ -690,25 +711,24 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 			}
 			return true
 		}
-	case Mismatch:
-		if args.Term != rf.currentTerm {
-			return false
+	case Mismatch, AppCommitted:
+		if reply.Term > rf.currentTerm {
+			rf.status = Follower
+			rf.votedFor = -1
+			rf.timer.Reset(rf.overtime)
+			rf.currentTerm = reply.Term
+			rf.persist()
 		}
 		rf.nextIndex[server] = reply.UpNextIndex
 	//If AppendEntries RPC received from new leader: convert to follower(paper - 5.2)
 	//reason: 出现网络分区，该Leader已经OutOfDate(过时）
 	case AppOutOfDate:
-
 		// 该节点变成追随者,并重置rf状态
 		rf.status = Follower
 		rf.votedFor = -1
 		rf.timer.Reset(rf.overtime)
 		rf.currentTerm = reply.Term
-	case AppCommitted:
-		if args.Term != rf.currentTerm {
-			return false
-		}
-		rf.nextIndex[server] = reply.UpNextIndex
+		rf.persist()
 	}
 
 	return ok
@@ -775,7 +795,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.logs = append(rf.logs, args.Entries...)
 
 	}
-
+	rf.persist()
 	// 将日志提交至与Leader相同
 	for rf.lastApplied < args.LeaderCommit {
 		rf.lastApplied++
