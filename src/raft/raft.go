@@ -730,13 +730,17 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 			return
 		}
 
-	case Mismatch:
-		if args.Term != rf.currentTerm {
-			return
+	case Mismatch, AppCommitted:
+		if reply.Term > rf.currentTerm {
+			rf.status = Follower
+			rf.votedFor = -1
+			rf.timer.Reset(rf.overtime)
+			rf.currentTerm = reply.Term
+			rf.persist()
 		}
 		rf.nextIndex[server] = reply.UpNextIndex
 	//If AppendEntries RPC received from new leader: convert to follower(paper - 5.2)
-	//reason: 出现网络分区，该Leader已经OutOfDate(过时）
+	//reason: 出现网络分区，该Leader已经OutOfDate(过时）,term小于发送者
 	case AppOutOfDate:
 
 		// 该节点变成追随者,并重置rf状态
@@ -744,12 +748,8 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 		rf.votedFor = -1
 		rf.timer.Reset(rf.overtime)
 		rf.currentTerm = reply.Term
+		rf.persist()
 
-	case AppCommitted:
-		if args.Term != rf.currentTerm {
-			return
-		}
-		rf.nextIndex[server] = reply.UpNextIndex
 	}
 
 	return

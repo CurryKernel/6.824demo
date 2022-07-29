@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2a">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail">
       <change beforePath="$PROJECT_DIR$/src/raft/raft.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/raft/raft.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -118,7 +117,8 @@
     <MESSAGE value="lab2a debug" />
     <MESSAGE value="lab2b copy" />
     <MESSAGE value="lab2c copy" />
-    <option name="LAST_COMMIT_MESSAGE" value="lab2c copy" />
+    <MESSAGE value="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
