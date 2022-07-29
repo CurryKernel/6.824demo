@@ -461,24 +461,29 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	isLeader := true
 
 	// Your code here (2B).
+
 	if rf.killed() {
 		return index, term, false
 	}
+
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	//如果不是leader,直接返回
+	// 如果不是leader，直接返回
 	if rf.status != Leader {
 		return index, term, false
 	}
+
 	isLeader = true
-	//初始化日志条目，并进行追加
+
+	// 初始化日志条目。并进行追加
 	appendLog := LogEntry{Term: rf.currentTerm, Command: command}
 	rf.logs = append(rf.logs, appendLog)
 	index = len(rf.logs)
 	term = rf.currentTerm
 
 	return index, term, isLeader
+
 }
 
 //
@@ -596,7 +601,7 @@ func (rf *Raft) ticker() {
 					voteArgs := RequestVoteArgs{
 						Term:         rf.currentTerm,
 						CandidateId:  rf.me,
-						LastLogIndex: len(rf.logs) - 1,
+						LastLogIndex: len(rf.logs),
 						LastLogTerm:  0,
 					}
 					if len(rf.logs) > 0 {
@@ -616,29 +621,33 @@ func (rf *Raft) ticker() {
 					if i == rf.me {
 						continue
 					}
-					appendEntriesArgs := AppendEntriesArgs{
+					args := AppendEntriesArgs{
 						Term:         rf.currentTerm,
 						LeaderId:     rf.me,
 						PrevLogIndex: 0,
 						PrevLogTerm:  0,
 						Entries:      nil,
-						LeaderCommit: rf.commitIndex,
+						LeaderCommit: rf.commitIndex, // commitIndex为大多数log所认可的commitIndex
 					}
 
-					appendEntriesReply := AppendEntriesReply{}
-					//如果nextIndex[i]长度不等于rf.logs,代表leader的Log entries不一致，需要附带过去
+					reply := AppendEntriesReply{}
 
-					appendEntriesArgs.Entries = rf.logs[rf.nextIndex[i]-1:]
-					//代表已经不算初始值 0
+					// 如果nextIndex[i]长度不等于rf.logs,代表与leader的log entries不一致，需要附带过去
+
+					args.Entries = rf.logs[rf.nextIndex[i]-1:]
+
+					// 代表已经不是初始值0
 					if rf.nextIndex[i] > 0 {
-						appendEntriesArgs.PrevLogIndex = rf.nextIndex[i] - 1
+						args.PrevLogIndex = rf.nextIndex[i] - 1
 					}
-					if appendEntriesArgs.PrevLogIndex > 0 {
-						appendEntriesArgs.PrevLogTerm = rf.logs[appendEntriesArgs.PrevLogIndex-1].Term
+
+					if args.PrevLogIndex > 0 {
+						//fmt.Println("len(rf.log):", len(rf.logs), "PrevLogIndex):", args.PrevLogIndex, "rf.nextIndex[i]", rf.nextIndex[i])
+						args.PrevLogTerm = rf.logs[args.PrevLogIndex-1].Term
 					}
 
 					//fmt.Printf("[	ticker(%v) ] : send a election to %v\n", rf.me, i)
-					go rf.sendAppendEntries(i, &appendEntriesArgs, &appendEntriesReply, &appendNums)
+					go rf.sendAppendEntries(i, &args, &reply, &appendNums)
 				}
 			}
 
@@ -721,17 +730,13 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 			return
 		}
 
-	case Mismatch, AppCommitted:
-		if reply.Term > rf.currentTerm {
-			rf.status = Follower
-			rf.votedFor = -1
-			rf.timer.Reset(rf.overtime)
-			rf.currentTerm = reply.Term
-			rf.persist()
+	case Mismatch:
+		if args.Term != rf.currentTerm {
+			return
 		}
 		rf.nextIndex[server] = reply.UpNextIndex
 	//If AppendEntries RPC received from new leader: convert to follower(paper - 5.2)
-	//reason: 出现网络分区，该Leader已经OutOfDate(过时）,term小于发送者
+	//reason: 出现网络分区，该Leader已经OutOfDate(过时）
 	case AppOutOfDate:
 
 		// 该节点变成追随者,并重置rf状态
@@ -739,8 +744,12 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 		rf.votedFor = -1
 		rf.timer.Reset(rf.overtime)
 		rf.currentTerm = reply.Term
-		rf.persist()
 
+	case AppCommitted:
+		if args.Term != rf.currentTerm {
+			return
+		}
+		rf.nextIndex[server] = reply.UpNextIndex
 	}
 
 	return
