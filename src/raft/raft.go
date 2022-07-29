@@ -648,10 +648,10 @@ func (rf *Raft) ticker() {
 	}
 }
 
-func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply, appendNums *int) bool {
+func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply, appendNums *int) {
 
 	if rf.killed() {
-		return false
+		return
 	}
 
 	// paper中5.3节第一段末尾提到，如果append失败应该不断的retries ,直到这个log成功的被store
@@ -659,7 +659,7 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 	for !ok {
 
 		if rf.killed() {
-			return false
+			return
 		}
 		ok = rf.peers[server].Call("Raft.AppendEntries", args, reply)
 
@@ -669,34 +669,39 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
+	//fmt.Printf("[	sendAppendEntries func-rf(%v)	] get reply :%+v from rf(%v)\n", rf.me, reply, server)
 	// 对reply的返回状态进行分支
 	switch reply.AppState {
 
 	// 目标节点crash
 	case AppKilled:
 		{
-			return false
+			return
 		}
 
 	// 目标节点正常返回
 	case AppNormal:
 		{
+
 			// 2A的test目的是让Leader能不能连续任期，所以2A只需要对节点初始化然后返回就好
 			// 2B需要判断返回的节点是否超过半数commit，才能将自身commit
 			if reply.Success && reply.Term == rf.currentTerm && *appendNums <= len(rf.peers)/2 {
 				*appendNums++
 			}
+
 			// 说明返回的值已经大过了自身数组
 			if rf.nextIndex[server] > len(rf.logs)+1 {
-				return false
+				return
 			}
 			rf.nextIndex[server] += len(args.Entries)
 			if *appendNums > len(rf.peers)/2 {
-				//保证幂等性，不重复提交第二次
+				// 保证幂等性，不会提交第二次
 				*appendNums = 0
+
 				if len(rf.logs) == 0 || rf.logs[len(rf.logs)-1].Term != rf.currentTerm {
-					return false
+					return
 				}
+
 				for rf.lastApplied < len(rf.logs) {
 					rf.lastApplied++
 					applyMsg := ApplyMsg{
@@ -708,9 +713,14 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 					rf.commitIndex = rf.lastApplied
 					//fmt.Printf("[	sendAppendEntries func-rf(%v)	] commitLog  \n", rf.me)
 				}
+
 			}
-			return true
+			//fmt.Printf("[	sendAppendEntries func-rf(%v)	] rf.log :%+v  ; rf.lastApplied:%v\n",
+			//	rf.me, rf.logs, rf.lastApplied)
+
+			return
 		}
+
 	case Mismatch, AppCommitted:
 		if reply.Term > rf.currentTerm {
 			rf.status = Follower
@@ -721,23 +731,26 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 		}
 		rf.nextIndex[server] = reply.UpNextIndex
 	//If AppendEntries RPC received from new leader: convert to follower(paper - 5.2)
-	//reason: 出现网络分区，该Leader已经OutOfDate(过时）
+	//reason: 出现网络分区，该Leader已经OutOfDate(过时）,term小于发送者
 	case AppOutOfDate:
+
 		// 该节点变成追随者,并重置rf状态
 		rf.status = Follower
 		rf.votedFor = -1
 		rf.timer.Reset(rf.overtime)
 		rf.currentTerm = reply.Term
 		rf.persist()
+
 	}
 
-	return ok
+	return
 }
 
 // AppendEntries 建立心跳、同步日志RPC
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	//fmt.Printf("[	AppendEntries func-rf(%v) 	] arg:%+v,------ rf.logs:%v \n", rf.me, args, rf.logs)
 
 	// 节点crash
 	if rf.killed() {
@@ -747,11 +760,12 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		return
 	}
 
-	// 出现网络分区，args的任期，比当前raft的任期还小，说明args之前所在的分区已经OutOfDate
+	//  args.Term < rf.currentTerm:出现网络分区，args的任期，比当前raft的任期还小，说明args之前所在的分区已经OutOfDate 2A
 	if args.Term < rf.currentTerm {
 		reply.AppState = AppOutOfDate
 		reply.Term = rf.currentTerm
 		reply.Success = false
+
 		return
 	}
 
@@ -761,7 +775,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 1、 如果preLogIndex的大于当前日志的最大的下标说明跟随者缺失日志，拒绝附加日志
 	// 2、 如果preLog出`的任期和preLogIndex处的任期和preLogTerm不相等，那么说明日志存在conflict,拒绝附加日志
 	if args.PrevLogIndex > 0 && (len(rf.logs) < args.PrevLogIndex || rf.logs[args.PrevLogIndex-1].Term != args.PrevLogTerm) {
-
 		reply.AppState = Mismatch
 		reply.Term = rf.currentTerm
 		reply.Success = false
@@ -796,6 +809,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	}
 	rf.persist()
+
 	// 将日志提交至与Leader相同
 	for rf.lastApplied < args.LeaderCommit {
 		rf.lastApplied++
