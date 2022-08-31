@@ -4,8 +4,15 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail">
-      <change beforePath="$PROJECT_DIR$/src/raft/raft.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/raft/raft.go" afterDir="false" />
+    <list default="true" id="1b564225-7536-4bda-b73e-d54058782c1f" name="Changes" comment="lab2c">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/_2022_7_29_15_47___Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/在变基之前未提交的更改_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/在进行签出之前于_2022_7_29_15_47_取消提交了变更_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kvraft/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/kvraft/client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kvraft/common.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/kvraft/common.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kvraft/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/kvraft/server.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,7 +106,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/lab2c" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -118,7 +137,8 @@
     <MESSAGE value="lab2b copy" />
     <MESSAGE value="lab2c copy" />
     <MESSAGE value="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail" />
-    <option name="LAST_COMMIT_MESSAGE" value="lab2b &#10;Test (2B): RPC byte count ...&#10;  ... Passed --   7.0  3   46  113894   11&#10;  other fail" />
+    <MESSAGE value="lab2c" />
+    <option name="LAST_COMMIT_MESSAGE" value="lab2c" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
